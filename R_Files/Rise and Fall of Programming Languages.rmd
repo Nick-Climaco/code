@@ -1,0 +1,86 @@
+---
+title: "Rise and Fall of Programming Languages"
+author: "Nick Climaco"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("tidyverse")
+library("ggplot2")
+```
+
+```{r}
+by_tag_year <- read_csv("R_files/by_tag_year.csv")
+```
+```{r}
+head(by_tag_year)
+```
+
+## Create Fraction Format
+```{r}
+by_tag_year_fraction <- by_tag_year |> 
+    mutate(fraction = round(number/year_total, 6))
+
+head(by_tag_year_fraction)
+```
+
+## Has R been growing or shrinking ?
+```{r}
+r_over_time <- by_tag_year_fraction |> 
+    filter(tag == "r")
+print(r_over_time)
+```
+
+## Visualizing change over time
+```{r}
+r_over_time |> 
+    ggplot(aes(x = year, y = fraction)) +
+    geom_line() +
+    geom_point() +
+    ggtitle("R tag") +
+    theme_bw()
+```
+
+## How about dplyr and ggplot2?
+```{r}
+by_tag_year_fraction |> 
+    group_by(tag) |> 
+    subset(tag == "dplyr" | tag == "ggplot2" | tag == "r") |> 
+    ggplot(aes(x = year , y = fraction, color = tag)) +
+    geom_line() +
+    geom_point() +
+    theme_bw()
+```
+
+## What are the most asked-about tags?
+```{r}
+sorted_tags <- by_tag_year_fraction |> 
+    group_by(tag) |> 
+    summarize(tag_total = sum(number)) |> 
+    arrange(desc(tag_total))
+
+sorted_tags
+```
+
+## How have large programming languages changed over time?
+
+
+```{r}
+highest_tags <- head(sorted_tags$tag)
+
+by_tag_subset <- by_tag_year_fraction |> 
+    filter(tag %in% highest_tags)
+
+by_tag_subset |> 
+    ggplot(aes(x = year, y = fraction, color = tag)) +
+    geom_line() +
+    geom_point() + 
+    theme_bw()
+```
+
+## Some more tags! (tags of interest)
